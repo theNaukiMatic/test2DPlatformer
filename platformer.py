@@ -1,4 +1,5 @@
 import pygame
+import render
 
 # variables
 SCREEN_SIZE = (800, 600)
@@ -18,12 +19,43 @@ clock = pygame.time.Clock()
 # player
 player_height = 128
 player_width = 96
-player_image = pygame.image.load('assets/skeleton_idle/skeleton_idle_00.png')
+
+player_walking_animation = render.Animation([
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_00.png'),
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_01.png'),
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_02.png'),
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_03.png'),
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_04.png'),
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_05.png'),
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_06.png'),
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_07.png'),
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_08.png'),
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_09.png'),
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_10.png'),
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_11.png'),
+    pygame.image.load('assets/skeleton_walk/skeleton_walk_12.png'),
+])
+player_walking_animation.setAnimationSpeed(4)
+player_idle_animation = render.Animation([
+    pygame.image.load('assets/skeleton_idle/skeleton_idle_00.png'),
+    pygame.image.load('assets/skeleton_idle/skeleton_idle_01.png'),
+    pygame.image.load('assets/skeleton_idle/skeleton_idle_02.png'),
+    pygame.image.load('assets/skeleton_idle/skeleton_idle_03.png'),
+    pygame.image.load('assets/skeleton_idle/skeleton_idle_04.png'),
+    pygame.image.load('assets/skeleton_idle/skeleton_idle_05.png'),
+    pygame.image.load('assets/skeleton_idle/skeleton_idle_06.png'),
+    pygame.image.load('assets/skeleton_idle/skeleton_idle_07.png'),
+    pygame.image.load('assets/skeleton_idle/skeleton_idle_08.png'),
+    pygame.image.load('assets/skeleton_idle/skeleton_idle_09.png'),
+    pygame.image.load('assets/skeleton_idle/skeleton_idle_10.png'),
+])
 player_x = 300
 player_y = 0
 player_accelaration_y = GRAVITY
 player_speed_y = 0
 player_on_ground = False
+player_direction = "right"
+player_state = "idle"
 
 # platforms
 platforms = [
@@ -35,6 +67,8 @@ platforms = [
 isGameRunning = True
 # gameloop
 while(isGameRunning):
+
+    player_state = "idle"
     # input
     for event in pygame.event.get():
         # quit button
@@ -49,14 +83,22 @@ while(isGameRunning):
     # move left
     if(keys[pygame.K_LEFT]):
         new_player_x -= PLAYER_SPEED
+        player_direction = "left"
+        player_state = "walking"
 
     # move right
     if(keys[pygame.K_RIGHT]):
         new_player_x += PLAYER_SPEED
+        player_direction = "right"
+        player_state = "walking"
 
     # jump
     if(keys[pygame.K_SPACE]) and player_on_ground:
         player_speed_y = JUMP_SPEED
+
+    # animation updates
+    player_idle_animation.update()
+    player_walking_animation.update()
 
     # horizontal movement
     player_hitbox_x = pygame.Rect(
@@ -108,7 +150,19 @@ while(isGameRunning):
         pygame.draw.rect(screen, GROUND_COLOR, p)
 
     # Player
-    screen.blit(player_image, (player_x, player_y))
+    if(player_state == "idle"):
+        if player_direction == "right":
+            player_idle_animation.draw(screen, player_x, player_y, False)
+
+        else:
+            player_idle_animation.draw(screen, player_x, player_y, True)
+
+    else:
+        if player_direction == "right":
+            player_walking_animation.draw(screen, player_x, player_y, False)
+
+        else:
+            player_walking_animation.draw(screen, player_x, player_y, True)
 
     # Screen
     pygame.display.flip()
